@@ -8,6 +8,9 @@ public class VideoPlayerManager : MonoBehaviour
     private RenderTexture videoRT;
 
     [Header("Configurações do Vídeo")]
+    [Tooltip("Arraste o clipe de vídeo local (.mp4) para cá se preferir reproduzir localmente.")]
+    public VideoClip videoClip;
+
     [Tooltip("Insira a URL direta do vídeo (.mp4). Exemplo padrão: Videoaula de Introdução ao Kaizen/Lean.")]
     public string videoUrl = "https://archive.org/download/BigBuckBunny_328/BigBuckBunny_512kb.mp4"; 
 
@@ -32,9 +35,17 @@ public class VideoPlayerManager : MonoBehaviour
     {
         videoPlayer = GetComponent<VideoPlayer>();
         
-        // 1. Configura o player para ler a partir de uma URL direta
-        videoPlayer.source = VideoSource.Url;
-        videoPlayer.url = videoUrl;
+        // 1. Configura o player para usar clipe local ou URL da web
+        if (videoClip != null)
+        {
+            videoPlayer.source = VideoSource.VideoClip;
+            videoPlayer.clip = videoClip;
+        }
+        else
+        {
+            videoPlayer.source = VideoSource.Url;
+            videoPlayer.url = videoUrl;
+        }
         videoPlayer.playOnAwake = false;
 
         // 2. Cria o Render Texture dinamicamente se o Renderer for associado

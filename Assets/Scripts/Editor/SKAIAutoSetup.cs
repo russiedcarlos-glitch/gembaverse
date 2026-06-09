@@ -478,7 +478,18 @@ public class SKAIAutoSetup : EditorWindow
         if (vpm == null) vpm = screenObj.AddComponent<VideoPlayerManager>();
 
         vpm.screenRenderer = screenObj.GetComponent<Renderer>();
-        vpm.videoUrl = "https://archive.org/download/BigBuckBunny_328/BigBuckBunny_512kb.mp4";
+        
+        VideoClip clip = AssetDatabase.LoadAssetAtPath<VideoClip>("Assets/video/Design sem nome.mp4");
+        if (clip != null)
+        {
+            vpm.videoClip = clip;
+            Debug.Log("[SKAI Setup] Telão configurado com vídeo local do pai: Assets/video/Design sem nome.mp4");
+        }
+        else
+        {
+            vpm.videoUrl = "https://archive.org/download/BigBuckBunny_328/BigBuckBunny_512kb.mp4";
+            Debug.LogWarning("[SKAI Setup] Vídeo local não encontrado em Assets/video/Design sem nome.mp4. Usando URL da Web padrão.");
+        }
         vpm.playOnStart = true;
 
         // Garante que o telão possui um colisor para receber cliques do jogador
@@ -636,6 +647,7 @@ public class SKAIAutoSetup : EditorWindow
             canvasObj = null;
         }
 
+        bool isNewCanvas = false;
         if (canvasObj == null)
         {
             canvasObj = new GameObject("SKAI_KPI_Canvas", typeof(RectTransform));
@@ -643,6 +655,7 @@ public class SKAIAutoSetup : EditorWindow
             canvas.renderMode = RenderMode.WorldSpace;
             canvasObj.AddComponent<CanvasScaler>();
             canvasObj.AddComponent<GraphicRaycaster>();
+            isNewCanvas = true;
         }
         else
         {
@@ -653,10 +666,13 @@ public class SKAIAutoSetup : EditorWindow
             }
         }
 
-        // Posiciona na Sala de Estudos, ao lado esquerdo do telão original
-        canvasObj.transform.position = new Vector3(88.6f, 2.2f, 45.28f);
-        canvasObj.transform.rotation = Quaternion.Euler(0f, 180f, 0f); // Rotacionado 180 graus para ficar de frente para o player
-        canvasObj.transform.localScale = new Vector3(0.004f, 0.004f, 1f);
+        // Posiciona na Sala de Estudos, ao lado esquerdo do telão original apenas se for um Canvas novo
+        if (isNewCanvas)
+        {
+            canvasObj.transform.position = new Vector3(88.6f, 2.2f, 45.28f);
+            canvasObj.transform.rotation = Quaternion.Euler(0f, 180f, 0f); // Rotacionado 180 graus para ficar de frente para o player
+            canvasObj.transform.localScale = new Vector3(0.004f, 0.004f, 1f);
+        }
         
         RectTransform rect = canvasObj.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(900, 600);
@@ -973,33 +989,38 @@ public class SKAIAutoSetup : EditorWindow
         }
 
         // Se não achou nenhum Player Root, cria um novo "SKAI_Player"
+        bool isNewPlayer = false;
         if (playerRoot == null)
         {
             playerRoot = new GameObject("SKAI_Player");
             Debug.Log("[SKAI Setup] Criado novo GameObject 'SKAI_Player'.");
+            isNewPlayer = true;
         }
 
-        // Posiciona o jogador sempre na Sala de Estudos ao rodar o Setup
-        Vector3 studyRoomPos = new Vector3(93.37f, 0.5f, 41f);
-        GameObject screenObj = GameObject.Find("Telão_Sala_Estudo") ?? GameObject.Find("telão") ?? GameObject.Find("Telão") ?? GameObject.Find("Tela") ?? GameObject.Find("Screen") ?? GameObject.Find("TV");
-        if (screenObj != null)
+        // Posiciona o jogador sempre na Sala de Estudos ao rodar o Setup apenas se for um player novo
+        if (isNewPlayer)
         {
-            studyRoomPos = screenObj.transform.position - screenObj.transform.forward * 4.5f;
-            studyRoomPos.y = 0.5f;
+            Vector3 studyRoomPos = new Vector3(93.37f, 0.5f, 41f);
+            GameObject screenObj = GameObject.Find("Telão_Sala_Estudo") ?? GameObject.Find("telão") ?? GameObject.Find("Telão") ?? GameObject.Find("Tela") ?? GameObject.Find("Screen") ?? GameObject.Find("TV");
+            if (screenObj != null)
+            {
+                studyRoomPos = screenObj.transform.position - screenObj.transform.forward * 4.5f;
+                studyRoomPos.y = 0.5f;
+            }
+            
+            playerRoot.transform.position = studyRoomPos;
+            if (screenObj != null)
+            {
+                Vector3 lookTarget = screenObj.transform.position;
+                lookTarget.y = studyRoomPos.y;
+                playerRoot.transform.rotation = Quaternion.LookRotation(lookTarget - studyRoomPos);
+            }
+            else
+            {
+                playerRoot.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            }
+            Debug.Log($"[SKAI Setup] Posicionado Player na Sala de Estudos em {studyRoomPos}.");
         }
-        
-        playerRoot.transform.position = studyRoomPos;
-        if (screenObj != null)
-        {
-            Vector3 lookTarget = screenObj.transform.position;
-            lookTarget.y = studyRoomPos.y;
-            playerRoot.transform.rotation = Quaternion.LookRotation(lookTarget - studyRoomPos);
-        }
-        else
-        {
-            playerRoot.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-        }
-        Debug.Log($"[SKAI Setup] Posicionado Player na Sala de Estudos em {studyRoomPos}.");
 
         // Garante que o Player Root está ativo
         playerRoot.SetActive(true);
