@@ -79,3 +79,18 @@ Toda a lógica da simulação está organizada em scripts modulares em `Assets/S
 * `DisasterManager.cs`: Gerencia as regras de vitória, taxas de quebra e controle de cada cenário.
 * `ScenarioUIController.cs`: Responde aos cliques nos botões do telão e aplica destaque visual dos modos.
 * `PG_Player.cs` & `PG_FirstPersonCamera.cs`: Gerenciam a física de movimentação e visualização em primeira pessoa do usuário, com suporte para teleporte integrado.
+
+---
+
+## 📸 Evidências de Funcionamento (Telas do Jogo)
+
+Abaixo estão alguns registros visuais do simulador em funcionamento, demonstrando a navegação, diálogos com operários (NPCs) e os painéis de KPIs:
+
+![Dashboard e Sala de Aprendizagem](Documentation/screenshot1.png)
+*Dashboard principal na Sala de Estudos com seleção de treinamentos Kaizen e perfis industriais.*
+
+![Chão de Fábrica e Diálogos](Documentation/screenshot2.png)
+*Interação e diálogos imersivos com os operários (NPCs) no chão de fábrica.*
+
+![Simulação Física e Monitoramento](Documentation/screenshot3.png)
+*Linha de produção ativa com movimentação de materiais e painéis secundários de monitoramento.*
